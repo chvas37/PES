@@ -689,3 +689,794 @@
 //
 //    return 0;
 //}
+
+//№16
+//#include <iostream>
+//#include <vector>
+//#include <thread>
+//#include <mutex>
+//
+//class CustomList {
+//public:
+//    CustomList(std::vector<int>& data) : data(data), mutexes(data.size()) {}
+//
+//    void swap(int i, int j) {
+//        std::lock(mutexes[i], mutexes[j]);
+//        std::lock_guard<std::mutex> lock1(mutexes[i], std::adopt_lock);
+//        std::lock_guard<std::mutex> lock2(mutexes[j], std::adopt_lock);
+//
+//        std::swap(data[i], data[j]);
+//    }
+//
+//    void bubble_sort(int start, int end) {
+//        for (int i = start; i < end; ++i) {
+//            for (int j = 0; j < data.size()-i-1; ++j) {
+//                swap(j, j+1);
+//            }
+//        }
+//    }
+//
+//    void print_list() {
+//        for (const auto& item : data) {
+//            std::cout << item << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//
+//private:
+//    std::vector<int>& data;
+//    std::vector<std::mutex> mutexes;
+//};
+//
+//int main() {
+//    std::vector<int> data = {5, 3, 8, 1, 2};
+//    CustomList customList(data);
+//
+//    // Create two sorting threads
+//    std::thread thread1(&CustomList::bubble_sort, &customList, 0, data.size()/2);
+//    std::thread thread2(&CustomList::bubble_sort, &customList, data.size()/2, data.size());
+//
+//    // Join the threads
+//    thread1.join();
+//    thread2.join();
+//
+//    customList.print_list();
+//
+//    return 0;
+//}
+
+//№17
+//#include <iostream>
+//#include <vector>
+//#include <thread>
+//#include <mutex>
+//#include <chrono>
+//
+//class CustomList {
+//public:
+//    CustomList(std::vector<int>& data) : data(data), mutexes(data.size()) {}
+//
+//    void swap(int i, int j) {
+//        std::lock(mutexes[i], mutexes[j]);
+//        std::lock_guard<std::mutex> lock1(mutexes[i], std::adopt_lock);
+//        std::lock_guard<std::mutex> lock2(mutexes[j], std::adopt_lock);
+//
+//        std::swap(data[i], data[j]);
+//    }
+//
+//    void bubble_sort(int start, int end) {
+//        for (int i = start; i < end; ++i) {
+//            for (int j = 0; j < data.size()-i-1; ++j) {
+//                swap(j, j+1);
+//                std::this_thread::sleep_for(std::chrono::seconds(1)); // Задержка 1 секунда
+//                print_list(); // Выводим текущее состояние списка после каждой перестановки
+//            }
+//        }
+//    }
+//
+//    void print_list() {
+//        for (const auto& item : data) {
+//            std::cout << item << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//
+//private:
+//    std::vector<int>& data;
+//    std::vector<std::mutex> mutexes;
+//};
+//
+//int main() {
+//    std::vector<int> data = {5, 3, 8, 1, 2};
+//    CustomList customList(data);
+//
+//    // Create two sorting threads
+//    std::thread thread1(&CustomList::bubble_sort, &customList, 0, data.size()/2);
+//    std::thread thread2(&CustomList::bubble_sort, &customList, data.size()/2, data.size());
+//
+//    // Join the threads
+//    thread1.join();
+//    thread2.join();
+//
+//    return 0;
+//}
+
+//№18
+//#include <iostream>
+//#include <vector>
+//#include <thread>
+//#include <shared_mutex> // for std::shared_mutex
+//#include <mutex>       // for std::unique_lock
+//#include <chrono>
+//
+//class CustomList {
+//public:
+//    CustomList(std::vector<int>& data) : data(data) {}
+//
+//    void swap(int i, int j) {
+//        std::unique_lock<std::shared_mutex> lock(mutex);
+//        std::swap(data[i], data[j]);
+//    }
+//
+//    void bubble_sort(int start, int end) {
+//        for (int i = start; i < end; ++i) {
+//            for (int j = 0; j < data.size()-i-1; ++j) {
+//                swap(j, j+1);
+//                std::this_thread::sleep_for(std::chrono::seconds(1));
+//                print_list();
+//            }
+//        }
+//    }
+//
+//    void print_list() {
+//        std::shared_lock<std::shared_mutex> lock(mutex);
+//        for (const auto& item : data) {
+//            std::cout << item << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//
+//private:
+//    std::vector<int>& data;
+//    mutable std::shared_mutex mutex;
+//};
+//
+//int main() {
+//    std::vector<int> data = {5, 3, 8, 1, 2};
+//    CustomList customList(data);
+//
+//    // Create two sorting threads
+//    std::thread thread1(&CustomList::bubble_sort, &customList, 0, data.size()/2);
+//    std::thread thread2(&CustomList::bubble_sort, &customList, data.size()/2, data.size());
+//
+//    // Join the threads
+//    thread1.join();
+//    thread2.join();
+//
+//    return 0;
+//}
+
+//№19
+//#include <iostream>
+//#include <vector>
+//#include <thread>
+//#include <shared_mutex>
+//#include <mutex> // Add this line
+//#include <chrono>
+//
+//class CustomList {
+//public:
+//    CustomList(std::vector<int>& data) : data(data), mutexes(data.size()) {}
+//
+//    void swap(int i, int j) {
+//        std::unique_lock<std::shared_timed_mutex> lock(mutexes[i], std::defer_lock);
+//        std::unique_lock<std::shared_timed_mutex> lock2(mutexes[j], std::defer_lock);
+//
+//        std::lock(lock, lock2);
+//
+//        std::swap(data[i], data[j]);
+//    }
+//
+//    void bubble_sort(int start, int end) {
+//        for (int i = start; i < end; ++i) {
+//            for (int j = 0; j < data.size()-i-1; ++j) {
+//                swap(j, j+1);
+//                std::this_thread::sleep_for(std::chrono::seconds(1));
+//                print_list();
+//            }
+//        }
+//    }
+//
+//    void print_list() {
+//        std::shared_lock<std::shared_timed_mutex> lock(mutexes[0]);
+//        for (const auto& item : data) {
+//            std::cout << item << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//
+//private:
+//    std::vector<int>& data;
+//    std::vector<std::shared_timed_mutex> mutexes;
+//};
+//
+//int main() {
+//    std::vector<int> data = {5, 3, 8, 1, 2};
+//    CustomList customList(data);
+//
+//    // Create two sorting threads
+//    std::thread thread1(&CustomList::bubble_sort, &customList, 0, data.size()/2);
+//    std::thread thread2(&CustomList::bubble_sort, &customList, data.size()/2, data.size());
+//
+//    // Join the threads
+//    thread1.join();
+//    thread2.join();
+//
+//    return 0;
+//}
+
+//№20
+//#include <iostream>
+//#include <thread>
+//#include <mutex>
+//#include <condition_variable>
+//
+//std::mutex mtx;
+//std::condition_variable cv;
+//int countA = 0;
+//int countB = 0;
+//int countC = 0;
+//
+//const int targetWidgets = 5;  // Указывает, сколько винтиков нужно произвести
+//
+//void produceA() {
+//    std::this_thread::sleep_for(std::chrono::seconds(1)); // Имитация производства детали A
+//    {
+//        std::unique_lock<std::mutex> lock(mtx);
+//        countA++;
+//    }
+//    cv.notify_all();
+//}
+//
+//void produceB() {
+//    std::this_thread::sleep_for(std::chrono::seconds(2)); // Имитация производства детали B
+//    {
+//        std::unique_lock<std::mutex> lock(mtx);
+//        countB++;
+//    }
+//    cv.notify_all();
+//}
+//
+//void produceC() {
+//    std::this_thread::sleep_for(std::chrono::seconds(3)); // Имитация производства детали C
+//    {
+//        std::unique_lock<std::mutex> lock(mtx);
+//        countC++;
+//    }
+//    cv.notify_all();
+//}
+//
+//void assembleWidget() {
+//    std::unique_lock<std::mutex> lock(mtx);
+//    cv.wait(lock, [] { return countA > 0 && countB > 0 && countC > 0; });
+//
+//    countA--;
+//    countB--;
+//    countC--;
+//
+//    std::cout << "Widget assembled!\n";
+//    cv.notify_all();
+//}
+//
+//int main() {
+//    std::thread threadA, threadB, threadC, threadAssembly;
+//
+//    for (int i = 0; i < targetWidgets; ++i) {
+//        threadA = std::thread(produceA);
+//        threadB = std::thread(produceB);
+//        threadC = std::thread(produceC);
+//        threadAssembly = std::thread(assembleWidget);
+//
+//        threadA.join();
+//        threadB.join();
+//        threadC.join();
+//        threadAssembly.join();
+//    }
+//
+//    return 0;
+//}
+
+//№21
+//#include <iostream>
+//#include <curl/curl.h>
+//
+//size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
+//    size_t totalSize = size * nmemb;
+//    output->append(static_cast<char*>(contents), totalSize);
+//    return totalSize;
+//}
+//
+//int main(int argc, char* argv[]) {
+//    if (argc != 2) {
+//        std::cerr << "Usage: " << argv[0] << " <URL>" << std::endl;
+//        return 1;
+//    }
+//
+//    CURL* curl;
+//    CURLcode res;
+//
+//    curl_global_init(CURL_GLOBAL_DEFAULT);
+//
+//    curl = curl_easy_init();
+//    if (curl) {
+//        curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+//
+//        // Set the write callback function
+//        std::string response;
+//        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+//        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+//
+//        res = curl_easy_perform(curl);
+//
+//        if (res != CURLE_OK) {
+//            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+//        } else {
+//            // Print the response to the terminal
+//            std::cout << response << std::endl;
+//        }
+//
+//        curl_easy_cleanup(curl);
+//    }
+//
+//    curl_global_cleanup();
+//
+//    return 0;
+//}
+
+//№22
+//#include <iostream>
+//#include <curl/curl.h>
+//#include <boost/asio.hpp>
+//
+//class HttpClient {
+//public:
+//    HttpClient(boost::asio::io_context& ioContext)
+//            : ioContext(ioContext),
+//              resolver(ioContext),
+//              socket(ioContext),
+//              response(std::make_shared<std::string>()) {}
+//
+//    void makeRequest(const std::string& url) {
+//        // Use asynchronous DNS resolution
+//        resolver.async_resolve(url, "http",
+//                               [this](const boost::system::error_code& ec, boost::asio::ip::tcp::resolver::results_type results) {
+//                                   if (!ec) {
+//                                       // Connect to the server
+//                                       boost::asio::async_connect(socket, results,
+//                                                                  [this](const boost::system::error_code& ec, const boost::asio::ip::tcp::endpoint& endpoint) {
+//                                                                      if (!ec) {
+//                                                                          // Perform the HTTP request
+//                                                                          performHttpRequest();
+//                                                                      } else {
+//                                                                          std::cerr << "Connect error: " << ec.message() << std::endl;
+//                                                                      }
+//                                                                  }
+//                                       );
+//                                   } else {
+//                                       std::cerr << "Resolve error: " << ec.message() << std::endl;
+//                                   }
+//                               }
+//        );
+//
+//        ioContext.run(); // Run the io_context to start asynchronous operations
+//    }
+//
+//private:
+//    void performHttpRequest() {
+//        // Use libcurl for the HTTP request
+//        CURL* curl = curl_easy_init();
+//        if (curl) {
+//            curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+//            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, HttpClient::writeCallback);
+//            curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+//
+//            // Start the asynchronous HTTP request
+//            boost::asio::async_read_until(socket, responseBuffer, "\r\n\r\n",
+//                                          [this, curl](const boost::system::error_code& ec, std::size_t bytesRead) {
+//                                              if (!ec) {
+//                                                  // Print the response to the terminal
+//                                                  std::cout << response->substr(0, bytesRead) << std::endl;
+//
+//                                                  // Additional logic for handling the response data as needed
+//
+//                                                  // Close the socket and cleanup
+//                                                  curl_easy_cleanup(curl);
+//                                                  socket.close();
+//                                              } else {
+//                                                  std::cerr << "Read error: " << ec.message() << std::endl;
+//                                              }
+//                                          }
+//            );
+//        }
+//    }
+//
+//    static size_t writeCallback(void* contents, size_t size, size_t nmemb, HttpClient* client) {
+//        size_t totalSize = size * nmemb;
+//        client->getResponse()->append(static_cast<char*>(contents), totalSize);
+//        return totalSize;
+//    }
+//
+//    std::shared_ptr<std::string> getResponse() const {
+//        return response;
+//    }
+//
+//private:
+//    boost::asio::io_context& ioContext;
+//    boost::asio::ip::tcp::resolver resolver;
+//    boost::asio::ip::tcp::socket socket;
+//    boost::asio::streambuf responseBuffer;
+//    std::shared_ptr<std::string> response;
+//};
+//
+//int main(int argc, char* argv[]) {
+//    if (argc != 2) {
+//        std::cerr << "Usage: " << argv[0] << " <URL>" << std::endl;
+//        return 1;
+//    }
+//
+//    boost::asio::io_context ioContext;
+//    HttpClient httpClient(ioContext);
+//
+//    httpClient.makeRequest(argv[1]);
+//
+//    return 0;
+//}
+
+//№23
+//#include <iostream>
+//#include <thread>
+//#include <curl/curl.h>
+//
+//class HttpClient {
+//public:
+//    HttpClient(const std::string& url) : url(url) {}
+//
+//    void run() {
+//        // Запускаем поток для считывания данных из сетевого соединения
+//        std::thread networkThread(&HttpClient::performHttpRequest, this);
+//
+//        // Основной поток взаимодействия с пользователем
+//        interactWithUser();
+//
+//        // Ждем завершения потока сетевого соединения
+//        networkThread.join();
+//    }
+//
+//private:
+//    void performHttpRequest() {
+//        CURL* curl = curl_easy_init();
+//        if (curl) {
+//            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+//            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, HttpClient::writeCallback);
+//            curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+//
+//            // Выполняем HTTP-запрос
+//            CURLcode res = curl_easy_perform(curl);
+//
+//            if (res != CURLE_OK) {
+//                std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+//            }
+//
+//            // Очищаем curl
+//            curl_easy_cleanup(curl);
+//        }
+//    }
+//
+//    static size_t writeCallback(void* contents, size_t size, size_t nmemb, HttpClient* client) {
+//        size_t totalSize = size * nmemb;
+//        // Обработка данных (вывод, сохранение и т.д.)
+//        std::cout.write(static_cast<char*>(contents), totalSize);
+//        return totalSize;
+//    }
+//
+//    void interactWithUser() {
+//        // Пример взаимодействия с пользователем (здесь может быть ваша логика)
+//        std::string userInput;
+//        do {
+//            std::cout << "Enter 'q' to quit: ";
+//            std::getline(std::cin, userInput);
+//        } while (userInput != "q");
+//    }
+//
+//private:
+//    std::string url;
+//};
+//
+//int main(int argc, char* argv[]) {
+//    if (argc != 2) {
+//        std::cerr << "Usage: " << argv[0] << " <URL>" << std::endl;
+//        return 1;
+//    }
+//
+//    HttpClient httpClient(argv[1]);
+//    httpClient.run();
+//
+//    return 0;
+//}
+
+//№24
+//#include <iostream>
+//#include <string>
+//#include <vector>
+//#include <map>
+//#include <ctime>
+//#include <cstdlib>
+//#include <cstring>
+//#include <unistd.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
+//
+//const int MAX_BUFFER_SIZE = 102400;  /
+//const int CACHE_QUOTA = 52428800;
+//const int MAX_CLIENTS = 10;
+//
+//
+//struct CacheEntry {
+//    std::string url;
+//    time_t lastAccessTime;
+//    char* buffer;
+//    size_t bufferSize;
+//    size_t dataSize;
+//};
+//
+//// Proxy class
+//class Proxy {
+//public:
+//    Proxy(int port) : port(port) {
+//        initializeServer();
+//    }
+//
+//    void run() {
+//        while (true) {
+//            fd_set readFds;
+//            int maxFd = 0;
+//
+//            FD_ZERO(&readFds);
+//
+//            // Add server socket to the set
+//            FD_SET(serverSocket, &readFds);
+//            maxFd = serverSocket;
+//
+//            // Add client sockets to the set
+//            for (const auto& client : clients) {
+//                FD_SET(client.socket, &readFds);
+//                maxFd = std::max(maxFd, client.socket);
+//            }
+//
+//            // Wait for activity on any socket
+//            select(maxFd + 1, &readFds, nullptr, nullptr, nullptr);
+//
+//            // Check if there is a new connection on the server socket
+//            if (FD_ISSET(serverSocket, &readFds)) {
+//                acceptConnection();
+//            }
+//
+//            // Check if there is data from clients
+//            for (auto it = clients.begin(); it != clients.end();) {
+//                if (FD_ISSET(it->socket, &readFds)) {
+//                    processClient(*it);
+//                    if (it->disconnect) {
+//                        close(it->socket);
+//                        it = clients.erase(it);
+//                    } else {
+//                        ++it;
+//                    }
+//                } else {
+//                    ++it;
+//                }
+//            }
+//        }
+//    }
+//
+//private:
+//    int serverSocket;
+//    int port;
+//
+//    struct ClientInfo {
+//        int socket;
+//        bool disconnect;
+//        CacheEntry* cacheEntry;
+//    };
+//
+//    std::vector<ClientInfo> clients;
+//    std::map<std::string, CacheEntry> cacheIndex;
+//
+//    void initializeServer() {
+//        // Create server socket
+//        serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+//        if (serverSocket == -1) {
+//            perror("Error creating socket");
+//            exit(EXIT_FAILURE);
+//        }
+//
+//        // Setup server address structure
+//        sockaddr_in serverAddr{};
+//        serverAddr.sin_family = AF_INET;
+//        serverAddr.sin_addr.s_addr = INADDR_ANY;
+//        serverAddr.sin_port = htons(port);
+//
+//        // Bind the server socket
+//        if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+//            perror("Error binding");
+//            close(serverSocket);
+//            exit(EXIT_FAILURE);
+//        }
+//
+//        // Start listening
+//        if (listen(serverSocket, MAX_CLIENTS) == -1) {
+//            perror("Error listening");
+//            close(serverSocket);
+//            exit(EXIT_FAILURE);
+//        }
+//
+//        std::cout << "Proxy server is running on port " << port << std::endl;
+//    }
+//
+//    void acceptConnection() {
+//        sockaddr_in clientAddr{};
+//        socklen_t clientAddrLen = sizeof(clientAddr);
+//        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+//        if (clientSocket == -1) {
+//            perror("Error accepting connection");
+//            return;
+//        }
+//
+//        std::cout << "Accepted new connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
+//
+//        // Add the new client to the vector
+//        clients.push_back({clientSocket, false, nullptr});
+//    }
+//
+//    void processClient(ClientInfo& client) {
+//        char buffer[MAX_BUFFER_SIZE] = {0};
+//        ssize_t bytesRead = recv(client.socket, buffer, sizeof(buffer), 0);
+//
+//        if (bytesRead <= 0) {
+//            // Connection closed by client
+//            std::cout << "Client disconnected" << std::endl;
+//            client.disconnect = true;
+//            return;
+//        }
+//
+//        std::string request(buffer);
+//
+//        // Check if the request is in the cache
+//        auto cacheIt = cacheIndex.find(request);
+//        if (cacheIt != cacheIndex.end()) {
+//            std::cout << "Cache hit for URL: " << request << std::endl;
+//            sendCachedResponse(client.socket, cacheIt->
+
+//№25
+//#include <iostream>
+//#include <string>
+//#include <vector>
+//#include <map>
+//#include <ctime>
+//#include <cstdlib>
+//#include <cstring>
+//#include <thread>
+//#include <mutex>
+//#include <condition_variable>
+//#include <unistd.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
+//
+//const int MAX_BUFFER_SIZE = 102400;
+//const int CACHE_QUOTA = 52428800;
+//const int MAX_CLIENTS = 10;
+//
+//struct CacheEntry {
+//    std::string url;
+//    time_t lastAccessTime;
+//    char* buffer;
+//    size_t bufferSize;
+//    size_t dataSize;
+//};
+//
+//class Proxy {
+//public:
+//    Proxy(int port) : port(port) {
+//        initializeServer();
+//    }
+//
+//    void run() {
+//        while (true) {
+//            sockaddr_in clientAddr{};
+//            socklen_t clientAddrLen = sizeof(clientAddr);
+//            int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+//
+//            if (clientSocket == -1) {
+//                perror("Error accepting connection");
+//                continue;
+//            }
+//
+//            std::cout << "Accepted new connection from " << inet_ntoa(clientAddr.sin_addr) << std::endl;
+//
+//            std::thread(&Proxy::handleClient, this, clientSocket).detach();
+//        }
+//    }
+//
+//private:
+//    int serverSocket;
+//    int port;
+//    std::mutex cacheMutex;
+//    std::map<std::string, CacheEntry> cacheIndex;
+//
+//    void initializeServer() {
+//        serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+//        if (serverSocket == -1) {
+//            perror("Error creating socket");
+//            exit(EXIT_FAILURE);
+//        }
+//
+//        sockaddr_in serverAddr{};
+//        serverAddr.sin_family = AF_INET;
+//        serverAddr.sin_addr.s_addr = INADDR_ANY;
+//        serverAddr.sin_port = htons(port);
+//
+//        if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+//            perror("Error binding");
+//            close(serverSocket);
+//            exit(EXIT_FAILURE);
+//        }
+//
+//        if (listen(serverSocket, MAX_CLIENTS) == -1) {
+//            perror("Error listening");
+//            close(serverSocket);
+//            exit(EXIT_FAILURE);
+//        }
+//
+//        std::cout << "Proxy server is running on port " << port << std::endl;
+//    }
+//
+//    void handleClient(int clientSocket) {
+//        char buffer[MAX_BUFFER_SIZE] = {0};
+//        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+//
+//        if (bytesRead <= 0) {
+//            std::cout << "Client disconnected" << std::endl;
+//            close(clientSocket);
+//            return;
+//        }
+//
+//        std::string request(buffer);
+//
+//        auto cacheIt = cacheIndex.find(request);
+//        if (cacheIt != cacheIndex.end()) {
+//            std::cout << "Cache hit for URL: " << request << std::endl;
+//            sendCachedResponse(clientSocket, cacheIt->second);
+//        } else {
+//            std::cout << "Cache miss for URL: " << request << std::endl;
+//            fetchAndCacheResponse(clientSocket, request);
+//        }
+//
+//        close(clientSocket);
+//    }
+//
+//    void sendCachedResponse(int clientSocket, const CacheEntry& cacheEntry) {
+//        std::lock_guard<std::mutex> lock(cacheMutex);
+//        send(clientSocket, cacheEntry.buffer, cacheEntry.dataSize, 0);
+//    }
+//
+//    void fetchAndCacheResponse(int clientSocket, const std::string& request) {
+//
+//    }
+//};
+//
+//int main() {
+//    Proxy proxy(8000);
+//    proxy.run();
+//    return 0;
+//}
